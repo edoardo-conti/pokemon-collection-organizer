@@ -1,0 +1,65 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+
+h1, h2 {
+  text-align: center;
+}
+
+#setCheckboxes {
+  margin-bottom: 20px;
+}
+
+#cardTable {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+button {
+  margin: 10px;
+}
+
+#setCheckboxes {
+  margin-bottom: 10px;
+  max-height: 200px;
+  overflow-y: scroll;
+}
+
+.loading-icon::before {
+  content: "";
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #ccc;
+  border-top: 2px solid #333;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-left: 5px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+#cardTable {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  width: fit-content;
+  margin: auto;
+}
+
+#infoText {
+  white-space: pre-line;
+}
+
+img {
+  max-width: 150px;
+}
+
+.card-image-placeholder {
+  height: auto;
+}

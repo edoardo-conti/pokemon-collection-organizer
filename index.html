@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/styles.css">
+  <title>Pokémon Collection Organizer</title>
+</head>
+<body>
+  <h1>Pokémon Collection Organizer</h1>
+  
+  <div style="display: flex;">
+    <div style="flex: 1;">
+      <h2>Select sets:</h2>
+      <div id="setCheckboxes"></div>
+      <button id="loadButton">Load</button>
+      
+      <div id="sortControls">
+        <h2>Sort Controls:</h2>
+        <label for="sortMethod">Sort by:</label>
+        <select id="sortMethod">
+          <option value="pokedex">Pokedex</option>
+          <option value="set">Set</option>
+        </select>
+        <button id="sortButton">Sort</button>
+        <label for="evolutionSort">Sort Evolutions (WIP)</label>
+        <input type="checkbox" id="evolutionSort" name="evolutionSort">
+      </div>
+      
+      <div id="navigation">
+        <h2>Navigation:</h2>
+        <button id="prevButton">Previous</button>
+        <button id="nextButton">Next</button>
+        <button id="firstPageButton">First Page</button>
+        <button id="lastPageButton">Last Page</button>
+        <span id="pageIndicator"></span>
+      </div>
+
+      <div id="search">
+        <h2>Search:</h2>
+        <input type="text" id="searchInput" placeholder="type a card...">
+        <select id="searchResults" onchange="navigateToCard()">
+          <option value="" disabled selected>Results</option>
+        </select>
+        <button onclick="searchCard()">Search</button>
+      </div>
+    </div>
+
+    <div style="flex: 2; margin-left: 20px;">
+      <h2>Selected Cards:</h2>
+      <div id="cardTable"></div>
+    </div>
+  </div>
+  
+  <!-- Aggiungi il contatore e le liste separate dentro il div duplicatePokedexContainer -->
+  <div id="duplicatePokedexContainer" style="display: none;">
+    <h2>Duplicate Pokedex Cards</h2>
+    <p id="globalConflictCounter">Global Conflicts: 0, Same Set Conflicts: 0</p>
+    
+    <div id="sameSetConflicts">
+      <h3>Same Set Conflicts:</h3>
+      <ul id="sameSetConflictList"></ul>
+    </div>
+    
+    <div id="globalConflicts">
+      <h3>Global Conflicts:</h3>
+      <ul id="globalConflictList"></ul>
+    </div>
+  </div>
+
+  <script src="js/script.js"></script>
+</body>
+</html>

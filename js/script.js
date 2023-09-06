@@ -24,6 +24,8 @@ const cardsPerPage = 9; // Numero di carte per pagina
 const loadingIcon = document.createElement('span');
 loadingIcon.className = 'loading-icon';
 
+const debugMode = false;
+
 function simulateClick(element) {
   const event = new MouseEvent('click', {
     bubbles: true,
@@ -42,44 +44,87 @@ function updateSelectedSets(setId) {
 }
 
 async function fetchSets() {
-  const response = await fetch('https://api.pokemontcg.io/v2/sets');
-  const data = await response.json();
-  const sets = data.data;
+  // Ottieni il riferimento al container dei checkbox dei set
+  //const setCheckboxesContainer = document.getElementById('setCheckboxesContainer');
+
+  // Crea l'elemento dell'icona di caricamento e aggiungilo al container
+  const loadingIcon = document.createElement('div');
+  loadingIcon.classList.add('loading-icon'); // Assicurati che la classe 'loading-icon' abbia uno stile CSS appropriato
+  setCheckboxesContainer.appendChild(loadingIcon);
+
+  try {
+    const response = await fetch('https://api.pokemontcg.io/v2/sets');
+    const data = await response.json();
+    const sets = data.data;
   
-  sets.sort((a, b) => a.releaseDate.localeCompare(b.releaseDate));
-
-  sets.forEach(set => {
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.value = set.id;
-    checkbox.addEventListener('change', () => updateSelectedSets(set.id));
+    sets.sort((a, b) => a.releaseDate.localeCompare(b.releaseDate));
+  
+    sets.forEach(set => {
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.value = set.id;
+      checkbox.addEventListener('change', () => updateSelectedSets(set.id));
     
-    const label = document.createElement('label');
-    label.textContent = set.name;
+      const label = document.createElement('label');
+      label.textContent = set.name;
     
-    setCheckboxesContainer.appendChild(checkbox);
-    setCheckboxesContainer.appendChild(label);
-    setCheckboxesContainer.appendChild(document.createElement('br'));
+      setCheckboxesContainer.appendChild(checkbox);
+      setCheckboxesContainer.appendChild(label);
+      setCheckboxesContainer.appendChild(document.createElement('br'));
+  
+      selectedSetsNames[set.id] = set.name;
+    });
 
-    selectedSetsNames[set.id] = set.name;
-  });
+    if(debugMode) {
+      // WIP: auto-run -->
+      const setCheckbox1 = document.querySelector(`input[value="base1"]`);
+      const setCheckbox2 = document.querySelector(`input[value="base2"]`);
+      //const setCheckbox3 = document.querySelector(`input[value="base3"]`);
 
-  // WIP: auto-run -->
-  const setCheckbox1 = document.querySelector(`input[value="base1"]`);
-  const setCheckbox2 = document.querySelector(`input[value="base2"]`);
-  //const setCheckbox3 = document.querySelector(`input[value="base3"]`);
+      setCheckbox1.checked = true;
+      setCheckbox2.checked = true;
+      //setCheckbox3.checked = true;
 
-  setCheckbox1.checked = true;
-  setCheckbox2.checked = true;
-  //setCheckbox3.checked = true;
+      updateSelectedSets("base1");
+      updateSelectedSets("base2");
+      //updateSelectedSets("base3");
 
-  updateSelectedSets("base1");
-  updateSelectedSets("base2");
-  //updateSelectedSets("base3");
-
-  //simulateClick(loadButton);
-  // <-- WIP: auto-run
+      //simulateClick(loadButton);
+      // <-- WIP: auto-run
+    }
+  } catch (error) {
+    console.error('Error while loading the sets:', error);
+    alert('Error while loading the sets');
+  } finally {
+    // Rimuovi l'icona di caricamento e abilita i checkbox
+    loadingIcon.remove();
+  }
 }
+
+
+// async function fetchSets() {
+//   const response = await fetch('https://api.pokemontcg.io/v2/sets');
+//   const data = await response.json();
+//   const sets = data.data;
+  
+//   sets.sort((a, b) => a.releaseDate.localeCompare(b.releaseDate));
+
+//   sets.forEach(set => {
+//     const checkbox = document.createElement('input');
+//     checkbox.type = 'checkbox';
+//     checkbox.value = set.id;
+//     checkbox.addEventListener('change', () => updateSelectedSets(set.id));
+    
+//     const label = document.createElement('label');
+//     label.textContent = set.name;
+    
+//     setCheckboxesContainer.appendChild(checkbox);
+//     setCheckboxesContainer.appendChild(label);
+//     setCheckboxesContainer.appendChild(document.createElement('br'));
+
+//     selectedSetsNames[set.id] = set.name;
+//   });
+// }
 
 async function fetchCards() {
   allSelectedCards = [];
@@ -593,6 +638,14 @@ loadButton.addEventListener('click', async () => {
   loadButton.disabled = true;
   loadButton.textContent = 'Loading...';
 
+  // Creare un elemento di icona di caricamento
+  const loadingIcon = document.createElement('div');
+  loadingIcon.className = 'loading-icon';
+
+  // Aggiungere l'icona di caricamento al div cardTable
+  cardTable.textContent = ''; // Rimuovere il contenuto esistente
+  cardTable.appendChild(loadingIcon);
+
   await fetchCards();
 
   renderCardTable();
@@ -603,6 +656,8 @@ loadButton.addEventListener('click', async () => {
 
   loadButton.textContent = 'Load';
   loadButton.disabled = false;
+
+  loadingIcon.remove();
 
   // WIP: auto-run -->
   //const sortMethodSelect = document.getElementById('evolutionSort');

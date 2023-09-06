@@ -27,16 +27,15 @@ button {
   overflow-y: scroll;
 }
 
-.loading-icon::before {
-  content: "";
+/* CSS per l'icona di caricamento */
+.loading-icon {
   display: inline-block;
-  width: 20px;
-  height: 20px;
-  border: 2px solid #ccc;
-  border-top: 2px solid #333;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-left: 5px;
+  width: 24px; /* Imposta la larghezza desiderata */
+  height: 24px; /* Imposta l'altezza desiderata */
+  border: 3px solid #f3f3f3; /* Colore del bordo */
+  border-top: 3px solid #3498db; /* Colore del bordo superiore (effetto rotazione) */
+  border-radius: 50%; /* Forma circolare */
+  animation: spin 1s linear infinite; /* Animazione di rotazione */
 }
 
 @keyframes spin {

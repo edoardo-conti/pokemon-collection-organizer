@@ -7,6 +7,19 @@ h1, h2 {
   text-align: center;
 }
 
+#dashboard {
+  display: flex;
+}
+
+#dashboard-panels {
+  flex: 1;
+}
+
+#dashboard-grid {
+  flex: 2; 
+  margin-left: 20px;
+}
+
 #setCheckboxes {
   margin-bottom: 20px;
 }
@@ -59,6 +72,96 @@ img {
   max-width: 150px;
 }
 
-.card-image-placeholder {
+img.card-image {
+  width: 100%;
+  width: -moz-available;          /* WebKit-based browsers will ignore this. */
+  width: -webkit-fill-available;  /* Mozilla-based browsers will ignore this. */
+  width: fill-available;
+}
+
+img.card-image-placeholder {
   height: auto;
+  width: 100%;
+  width: -moz-available;          /* WebKit-based browsers will ignore this. */
+  width: -webkit-fill-available;  /* Mozilla-based browsers will ignore this. */
+  width: fill-available;
+}
+
+#navigation {
+  text-align: center;
+}
+
+#desktop {
+  flex: 1;
+  border: 2px dashed red;
+  padding: 10px;
+  position: relative;
+  display: none;
+  flex-direction: row; /* Rendi i contenuti orizzontalmente allineati */
+  align-items: center; /* Allinea i contenuti al centro */
+  overflow-x: scroll; /* Abilita lo scrolling orizzontale se necessario */
+  margin: auto;
+  max-width: 446px;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.card-image-desktop {
+  width: 80px;
+}
+
+/* Stili per dispositivi mobili */
+@media (max-width: 768px) {
+  /* #dashboard {
+    display: block;
+  } */
+  #dashboard-grid {
+    margin-left: 0px;
+  }
+  #dashboard {
+    display: flex;
+    flex-direction: column; /* Imposta la direzione della flessione a colonna */
+  }
+  #dashboard-grid {
+    margin-left: 0px;
+    order: 1; /* Modifica l'ordine di visualizzazione */
+  }
+  #dashboard-panels {
+    order: 2; /* Modifica l'ordine di visualizzazione */
+  }
+  #sortControls {
+    margin-bottom: 10px;
+  }
+  #navigation, #search {
+    position: sticky;
+    left: 0;
+    bottom: 0;
+    text-align: center;
+    background-color: white;
+    width: 100%;
+  }
+  #navigation {
+    bottom: 40px;
+    margin-bottom: 20px;
+  }
+  #search {
+    height: 40px;
+  }
+  #navigation > button {
+    text-align: center;
+    width: 24%;
+    margin: 0;
+    height: 40px;
+  }
+  #navigation > h2, #search > h2 {
+    display: none;
+  }
+  #search > button, #search > input, #search > select {
+    width: 31.8%;
+    margin: 0px;
+    height: 100%;
+  }
+  #search > input {
+    height: 85%;
+  }
 }

@@ -9,11 +9,13 @@
 <body>
   <h1>Pokémon Collection Organizer</h1>
   
-  <div style="display: flex;">
-    <div style="flex: 1;">
-      <h2>Select sets:</h2>
-      <div id="setCheckboxes"></div>
-      <button id="loadButton">Load</button>
+  <div id="dashboard">
+    <div id="dashboard-panels">
+      <div id="setspanel">
+        <h2>Select sets:</h2>
+        <div id="setCheckboxes"></div>
+        <button id="loadButton">Load</button>
+      </div>
       
       <div id="sortControls">
         <h2>Sort Controls:</h2>
@@ -27,15 +29,6 @@
         <input type="checkbox" id="evolutionSort" name="evolutionSort">
       </div>
       
-      <div id="navigation">
-        <h2>Navigation:</h2>
-        <button id="prevButton">Previous</button>
-        <button id="nextButton">Next</button>
-        <button id="firstPageButton">First Page</button>
-        <button id="lastPageButton">Last Page</button>
-        <span id="pageIndicator"></span>
-      </div>
-
       <div id="search">
         <h2>Search:</h2>
         <input type="text" id="searchInput" placeholder="type a card...">
@@ -44,11 +37,42 @@
         </select>
         <button onclick="searchCard()">Search</button>
       </div>
+
+      <div id="manualmode-panel">
+        <h2>Manual Mode:</h2>
+        <button id="manualModeButton" onclick="toggleManualMode()">Attiva Modalità Manuale</button>
+        <button id="trashDesktop" onclick="trashDesktop()" style="display: none">Svuota il Desktop</button>
+      </div>
+
+      <div id="savecol-panel">
+        <h2>Import/Export:</h2>
+        <select id="saveMode">
+          <option value="local">Browser Web Storage</option>
+          <option value="json">Download JSON file</option>
+        </select>
+        <button id="saveOrDownloadButton">Save</button>
+
+        <select id="loadMode">
+          <option value="local">Browser Web Storage</option>
+          <option value="json">Upload JSON file</option>
+        </select>
+        <input type="file" id="loadJsonInput" accept=".json" style="display: none;">
+        <button id="loadCollButton">Load</button>
+      </div>
+      
     </div>
 
-    <div style="flex: 2; margin-left: 20px;">
+    <div id="dashboard-grid">
       <h2>Selected Cards:</h2>
+      <div id="desktop"></div>
       <div id="cardTable"></div>
+      <div id="navigation">
+        <button id="prevButton">Previous</button>
+        <button id="nextButton">Next</button>
+        <button id="firstPageButton">First Page</button>
+        <button id="lastPageButton">Last Page</button>
+        <span id="pageIndicator"></span>
+      </div>
     </div>
   </div>
   

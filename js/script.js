@@ -11,20 +11,32 @@ const globalConflictList = document.getElementById('globalConflictList');
 const sortMethodSelect = document.getElementById('sortMethod');
 const sortButton = document.getElementById('sortButton');
 const duplicatePokedexContainer = document.getElementById('duplicatePokedexContainer');
+const manualModeButton = document.getElementById('manualModeButton');
+const mmDesktop = document.getElementById('desktop');
+const trashDesktopButton = document.getElementById('trashDesktop');
 
 let selectedSets = [];
 let allSelectedCards = [];
 let displayedCardsIndex = 0;
-
 let selectedSetsNames = [];
 
-let currentPage = 0; // Pagina attualmente visualizzata
+let currentPage = 1; // Pagina attualmente visualizzata
 const cardsPerPage = 9; // Numero di carte per pagina
 
 const loadingIcon = document.createElement('span');
 loadingIcon.className = 'loading-icon';
 
 const debugMode = false;
+
+let manualModeEnabled = false;
+let draggedCardIndex = null;
+let draggedCardLocation = null;
+let draggedCardZone = null;
+let draggableCards = [];
+
+let cardsOnPage = false;
+
+let allCardsInDesktop = [];
 
 function simulateClick(element) {
   const event = new MouseEvent('click', {
@@ -149,27 +161,42 @@ function renderCardTable() {
 
   for (let i = displayedCardsIndex; i < displayedCardsIndex + 9; i++) {
     const cardImage = document.createElement('img');
-    cardImage.className = 'card-image';
-    cardImage.className = 'card-image-placeholder';
-
+    
     if (i < allSelectedCards.length) {
       const card = allSelectedCards[i];
+      cardImage.className = 'card-image';
       cardImage.src = card.images.small;
-      
+
+      if(card.name == "placeholder") {
+        cardImage.classList.add('card-image-placeholder');
+      } else {
+        cardImage.classList.add('card-image-real');
+      }
+
     } else {
+      cardImage.className = 'card-image-placeholder';
       cardImage.src = 'https://crystal-cdn3.crystalcommerce.com/photos/5298083/pkm-cardback.png';
-      cardImage.width = "240"
-      cardImage.height = "330"
+      cardImage.width = "240";
+      cardImage.height = "330";
     }
 
     cardTable.appendChild(cardImage);
+  }
+
+  if(manualModeEnabled) {
+    manualModeInit();
   }
 
   // Abilita o disabilita i pulsanti per la navigazione alla prima e all'ultima pagina
   firstPageButton.disabled = displayedCardsIndex === 0;
   lastPageButton.disabled = displayedCardsIndex + 9 >= allSelectedCards.length;
 
+  prevButton.disabled = firstPageButton.disabled;
+  nextButton.disabled = lastPageButton.disabled;
+
   updatePageIndicator();
+
+  cardsOnPage = true;
 }
 
 function findDuplicatePokedexCards() {
@@ -238,7 +265,6 @@ function updateInfoText() {
     infoText.textContent = `Selected sets: ${selectedSets.length}\n`;
     
     selectedSets.forEach(setId => {
-      console.log(setId);
       const setCardCount = allSelectedCards.filter(card => card.set.id === setId).length;
       infoText.textContent += `Set ${selectedSetsNames[setId]}: ${setCardCount} cards | `;
     });
@@ -778,7 +804,8 @@ function calculateTotalPages() {
 
 // Funzione per calcolare la pagina attuale basata su displayedCardsIndex
 function calculateCurrentPage() {
-  return Math.floor(displayedCardsIndex / cardsPerPage);
+  currentPage =  Math.floor(displayedCardsIndex / cardsPerPage);
+  return currentPage;
 }
 
 function updatePageIndicator() {
@@ -787,6 +814,272 @@ function updatePageIndicator() {
 
   pageIndicator.textContent = `Pagina ${calculateCurrentPage()+1} di ${totalPages}`;
 }
+
+function toggleManualMode() {
+  manualModeEnabled = !manualModeEnabled;
+  manualModeButton.textContent = manualModeEnabled ? 'Disattiva Modalità Manuale' : 'Attiva Modalità Manuale';
+
+  if(manualModeEnabled) {
+    mmDesktop.style.display = "flex";
+    trashDesktopButton.style.display = "block";
+
+    if(allCardsInDesktop.length > 0 && mmDesktop.innerHTML === "") {
+      fillDesktop();
+    }
+  } else {
+    mmDesktop.style.display = "none";
+    trashDesktopButton.style.display = "none";
+  }
+
+  manualModeInit();
+}
+
+function manualModeInit() {
+  // Aggiungi gestori di eventi alle carte in griglia
+  draggableCards = document.querySelectorAll('.card-image'); // Seleziona le carte
+
+  draggableCards.forEach(draggableCard => {
+    draggableCard.draggable = true; // Abilita il trascinamento delle carte
+    draggableCard.addEventListener('dragstart', mmHandleDragStart);
+    draggableCard.addEventListener('dragover', mmHandleDragOver);
+    draggableCard.addEventListener('drop', mmHandleDrop);
+  });
+
+  // Aggiungi gestori di eventi alle carte in griglia
+  draggableDesktopCards = document.querySelectorAll('.card-image-desktop'); // Seleziona le carte 
+
+  draggableDesktopCards.forEach(draggableDesktopCard => {
+    draggableDesktopCard.draggable = true; // Abilita il trascinamento delle carte
+    draggableDesktopCard.addEventListener('dragstart', mmHandleDragStart);
+  });
+}
+
+function calculateGlobalCardIndex(gridIndex) {
+  const currentPage = calculateCurrentPage(); 
+  const globalCardIndex = currentPage * cardsPerPage + gridIndex;
+  return globalCardIndex;
+}
+
+
+function mmHandleDragStart(event) {
+  if (manualModeEnabled) {
+    draggedCardLocation = event.target;
+
+    if(draggedCardLocation.hasAttribute("cardindex")) {
+      // desktop
+      draggedCardIndex = draggedCardLocation.getAttribute("cardindex");
+      draggedCardZone = "DESKTOP";
+    } else {
+      // griglia
+      draggedCardIndex = Array.from(draggableCards).indexOf(event.target);
+      // conversione ad indice globale per 'allSelectedCards'
+      draggedCardIndex = calculateGlobalCardIndex(draggedCardIndex);
+      draggedCardZone = "GRID";
+    }
+
+  }
+}
+
+function mmHandleDragOver(event) {
+  if (manualModeEnabled) {
+    event.preventDefault();
+  }
+}
+
+function mmHandleDrop(event) {
+  if (manualModeEnabled) {
+    event.preventDefault();
+    let targetIndex = Array.from(draggableCards).indexOf(event.target);
+    // conversione ad indice globale per 'allSelectedCards'
+    targetIndex = calculateGlobalCardIndex(targetIndex);
+
+    if(draggedCardZone == "GRID") {
+      if (targetIndex !== draggedCardIndex) {
+        // Effettua lo scambio delle carte nei tuoi dati (allSelectedCards)
+        const temp = allSelectedCards[draggedCardIndex];
+        allSelectedCards[draggedCardIndex] = allSelectedCards[targetIndex];
+        allSelectedCards[targetIndex] = temp;
+  
+        // Aggiorna l'interfaccia utente con le nuove posizioni delle carte
+        renderCardTable();
+      }
+    } else if(draggedCardZone == "DESKTOP") {      
+      if(event.target.classList.contains('card-image-placeholder')) {
+        // si cerca di sostituire una carta da desktop ad uno slot vuoto su grid
+        allSelectedCards[targetIndex] = allCardsInDesktop[draggedCardIndex];
+        // devo rimuovere la carta dal desktop
+        allCardsInDesktop[draggedCardIndex] = null;
+
+        // aggiorna desktop
+        fillDesktop();
+        
+        // Aggiorna l'interfaccia utente con le nuove posizioni delle carte
+        renderCardTable();
+      }
+    }
+  }
+}
+
+// Funzione per salvare il raccoglitore in locale
+function saveCollectionLocally() {
+  localStorage.setItem('collection', JSON.stringify(allSelectedCards));
+  localStorage.setItem('collection-desktop', JSON.stringify(allCardsInDesktop));
+}
+
+// Funzione per scaricare la collezione come file JSON
+function downloadCollectionAsJSON() {
+  const collectionData = JSON.stringify(allSelectedCards);
+  const blob = new Blob([collectionData], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'collection.json';
+
+  // Aggiungi il link al documento e simula un clic
+  document.body.appendChild(a);
+  a.click();
+
+  // Rimuovi il link dal documento
+  document.body.removeChild(a);
+}
+
+// Gestore del click sul bottone di salvataggio/scaricamento
+document.getElementById('saveOrDownloadButton').addEventListener('click', function () {
+  if(cardsOnPage) {
+    const selectedMode = document.getElementById('saveMode').value;
+    
+    if (selectedMode === 'local') {
+      saveCollectionLocally();
+    } else if (selectedMode === 'json') {
+      downloadCollectionAsJSON();
+    }
+
+    alert('collezione salvata correttamente!')
+  }
+});
+
+// Funzione per caricare la collezione dalla memoria locale
+function loadCollectionFromLocal() {
+  const collectionData = localStorage.getItem('collection');
+  const collectionDesktopData = localStorage.getItem('collection-desktop');
+
+  if (collectionData) {
+    allSelectedCards = JSON.parse(collectionData);
+    renderCardTable(); // Aggiorna l'interfaccia utente
+  } else {
+    alert('Error: no collection available');
+  }
+
+  if(collectionDesktopData) {
+    allCardsInDesktop = JSON.parse(collectionDesktopData);
+    fillDesktop();
+  }
+}
+
+// Funzione per caricare la collezione da un file JSON
+function loadCollectionFromJSONFile(file) {
+  const reader = new FileReader();
+
+  reader.onload = function (event) {
+    const collectionData = event.target.result;
+    allSelectedCards = JSON.parse(collectionData);
+    renderCardTable(); // Aggiorna l'interfaccia utente
+  };
+
+  reader.readAsText(file);
+}
+
+// Gestore dell'evento di selezione di un file
+document.getElementById('loadJsonInput').addEventListener('change', function (event) {
+  const selectedFile = event.target.files[0];
+  if (selectedFile) {
+    loadCollectionFromJSONFile(selectedFile);
+  }
+});
+
+// Gestore del click sul bottone di caricamento
+document.getElementById('loadCollButton').addEventListener('click', function () {
+  const selectedMode = document.getElementById('loadMode').value;
+
+  if (selectedMode === 'local') {
+    loadCollectionFromLocal();
+  } else if (selectedMode === 'json') {
+    // Attiva il selettore di file per scegliere il file JSON
+    document.getElementById('loadJsonInput').click();
+  }
+});
+
+// desktop 
+const newPlaceholderCard = {
+  "name": "placeholder",
+  "images": {
+      "small": "https://crystal-cdn3.crystalcommerce.com/photos/5298083/pkm-cardback.png"
+  }
+};
+
+function fillDesktop() {
+  // reset
+  mmDesktop.innerHTML = "";
+
+  allCardsInDesktop.forEach(function callback(cardToInsert, cardIndex) {
+    if(cardToInsert) {
+      mmDesktop.appendChild(createCardElement(cardToInsert, cardIndex));
+    }
+  });
+}
+
+// Funzione per spostare una carta dalla griglia al desktop
+function moveToDesktop(cardIndex) {
+  let card = allSelectedCards[cardIndex];
+
+  if(card) {
+    mmDesktop.appendChild(createCardElement(card, cardIndex)); // Aggiungi la carta al desktop
+    allCardsInDesktop[cardIndex] = card;
+    
+    // Assegna l'oggetto newCard all'elemento con l'indice cardIndex
+    allSelectedCards[cardIndex] = newPlaceholderCard;
+
+    renderCardTable(); // Aggiorna la griglia
+  }
+}
+
+// Funzione per creare un elemento carta
+function createCardElement(card, cardIndex) {
+  let cardElement = document.createElement('img');
+
+  cardElement.className = 'card-image-desktop';
+  cardElement.src = card.images.small;
+  cardElement.setAttribute('cardIndex', cardIndex);
+
+  return cardElement;
+}
+
+mmDesktop.addEventListener('dragover', (event) => {
+  if (manualModeEnabled) {
+    if(draggedCardZone == "GRID") {
+      event.preventDefault(); // Consenti il rilascio
+    }
+  }
+});
+
+mmDesktop.addEventListener('drop', (event) => {
+  if (manualModeEnabled) {
+    event.preventDefault();
+    
+    // Verifica se il rilascio avviene sulla scrivania
+    if(draggedCardIndex && draggedCardZone == "GRID") {
+      moveToDesktop(draggedCardIndex); // Sposta la carta al desktop
+    }
+  }
+});
+
+function trashDesktop() {
+  if (manualModeEnabled) {
+    allCardsInDesktop = [];
+    mmDesktop.innerHTML = "";
+  }
+};
 
 fetchSets();
 

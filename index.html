@@ -26,7 +26,7 @@
         </select>
         <button id="sortButton">Sort</button>
         <label for="evolutionSort">Sort Evolutions (WIP)</label>
-        <input type="checkbox" id="evolutionSort" name="evolutionSort">
+        <input type="checkbox" id="evolutionSort" name="evolutionSort" disabled>
       </div>
       
       <div id="search">
@@ -40,8 +40,9 @@
 
       <div id="manualmode-panel">
         <h2>Manual Mode:</h2>
-        <button id="manualModeButton" onclick="toggleManualMode()">Attiva Modalità Manuale</button>
-        <button id="trashDesktop" onclick="trashDesktop()" style="display: none">Svuota il Desktop</button>
+        <button id="manualModeButton" onclick="toggleManualMode()">Toggle Manual Mode</button>
+        <button id="trashDesktop" onclick="trashDesktop()" style="display: none">Empty the Desktop</button>
+        <button id="deletePage" onclick="deleteCurrentPage()" style="display: none">Delete current page</button>
       </div>
 
       <div id="savecol-panel">
@@ -76,6 +77,11 @@
     </div>
   </div>
   
+  <div id="cardPopup" class="popup">
+    <span class="close" id="closePopup">&times;</span>
+    <img src="" id="popupImage" alt="Enlarged Card">
+  </div>  
+
   <!-- Aggiungi il contatore e le liste separate dentro il div duplicatePokedexContainer -->
   <div id="duplicatePokedexContainer" style="display: none;">
     <h2>Duplicate Pokedex Cards</h2>
@@ -93,6 +99,7 @@
   </div>
 
   <script src="js/script.js"></script>
+  <script src="js/sorting_scripts.js"></script>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-7WNTRRHPQ5"></script>
   <script>
